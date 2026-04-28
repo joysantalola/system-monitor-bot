@@ -2,16 +2,27 @@ import psutil
 import requests
 import time
 import datetime
+import os  # Necessari per gestionar fitxers
 
 from config import TOKEN, CHAT_ID
 
+# --- CONFIGURACIÓ DE LOGS ---
+LOG_FILE = "sistem-monitor_log.txt"
+
+def registrar_log(missatge):
+    """Escriu el missatge en un fitxer de text amb la data actual."""
+    marca_temps = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open(LOG_FILE, "a") as f:
+        f.write(f"[{marca_temps}] {missatge}\n")
+
 def enviar_alerta_telegram(missatge):
-    """Envia un missatge a Telegram."""
+    """Envia un missatge a Telegram i registra l'intent al log."""
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={missatge}"
     try:
         requests.get(url)
+        registrar_log(f"ALERTA ENVIADA A TELEGRAM: {missatge.replace(chr(10), ' ')}")
     except Exception as e:
-        print(f"Error enviant alerta a Telegram: {e}")
+        registrar_log(f"ERROR enviant alerta a Telegram: {e}")
 
 def monitoritzar_sistema():
     """Analitza recursos i envia alerta si els valors són crítics."""
@@ -23,24 +34,25 @@ def monitoritzar_sistema():
     # 2. Lògica d'alerta
     alertes = []
     if cpu_usage > 90:
-        alertes.append(f" ALERTA CPU: {cpu_usage}%")
+        alertes.append(f"ALERTA CPU: {cpu_usage}%")
     if ram_usage > 90: 
-        alertes.append(f" ALERTA RAM: {ram_usage}%")
+        alertes.append(f"ALERTA RAM: {ram_usage}%")
     
     # 3. Processar alertes
     if alertes:
-        missatge_final = f" {datetime.datetime.now().strftime('%H:%M:%S')}\n" + "\n".join(alertes)
+        missatge_final = f"{datetime.datetime.now().strftime('%H:%M:%S')} - " + ", ".join(alertes)
         enviar_alerta_telegram(missatge_final)
         print(f"Alerta enviada: {missatge_final}")
     else:
         print(f"Sistema OK. CPU: {cpu_usage}%, RAM: {ram_usage}%")
 
 if __name__ == "__main__":
-    print("Iniciant SentryBot... (Ctrl+C per aturar)")
+    registrar_log("sistem-monitorBot iniciat.") # Log d'inici
+    print("Iniciant sistem-monitorBot... (Ctrl+C per aturar)")
     try:
         while True:
             monitoritzar_sistema()
-            # Espera 5 minuts abans de la següent revisió
             time.sleep(300) 
     except KeyboardInterrupt:
-        print("\nSentryBot aturat.")
+        registrar_log("sistem-monitorBot aturat manualment.") # Log d'aturada
+        print("\nsistem-monitorBot aturat.")
