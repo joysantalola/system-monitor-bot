@@ -5,7 +5,8 @@ Eina d'automatització en Python per a la monitorització de recursos del sistem
 ## Funcionalitats
 * **Monitorització en temps real:** Comprova l'estat de la CPU i la RAM del sistema.
 * **Alertes intel·ligents:** Envia notificacions immediates a Telegram quan els recursos superen un llindar crític (90%).
-* **Estructura professional:** Dissenyat amb bona gestió de dependències i seguretat.
+* **Sistema de Logs:** Registre automàtic de tots els esdeveniments, alertes enviades i estat del bot (inici/aturada) al fitxer `sistem-monitor_log.txt` per a una traçabilitat completa i depuració.
+
 
 ## Requisits
 * Python 3.x
